@@ -1,0 +1,6 @@
+{
+    "tasks": [
+      { "id": 1, "title": "Hello JSON Server" },
+      { "id": 2, "title": "JSON Server Tutorial" }
+    ]
+  }
