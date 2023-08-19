@@ -1,6 +1,6 @@
 // json-server.ts
-import jsonServer from 'json-server';
-import db from './db.json';
+import * as jsonServer from 'json-server';
+import * as db from './db.json';
 
 const server = jsonServer.create();
 const middlewares = jsonServer.defaults();
