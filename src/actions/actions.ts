@@ -16,7 +16,7 @@ export interface Task {
 interface FetchDataRequestAction extends Action<ActionTypes.FETCH_DATA_REQUEST> {}
 
 interface FetchDataSuccessAction extends Action<ActionTypes.FETCH_DATA_SUCCESS> {
-  payload: Task[]; // Cambia aquí el tipo de datos a Task[]
+  payload: Task[];
 }
 
 interface FetchDataFailureAction extends Action<ActionTypes.FETCH_DATA_FAILURE> {

@@ -18,7 +18,6 @@ const App = () => {
 
   console.log('Datos obtenidos:', data);
 
-  // Renderizar el contenido de tu aplicación
   return <div>Contenido de la aplicación</div>;
 };
 
