@@ -1,26 +1,25 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from './reducers/rootReducer';
+import { fetchData } from './middleware/middleware';
+import { ThunkDispatch } from 'redux-thunk';
+import { DataActionTypes } from './actions/actions';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+const App = () => {
+  const data = useSelector((state: RootState) => state.data.data);
+  const dispatch = useDispatch<ThunkDispatch<RootState, null, DataActionTypes>>();
+  let obtainedData: any = [];
+
+  useEffect(() => {
+    if(obtainedData.length === 0){
+    obtainedData = dispatch(fetchData());
+  }
+  }, []);
+
+  console.log('Datos obtenidos:', data);
+
+  // Renderizar el contenido de tu aplicación
+  return <div>Contenido de la aplicación</div>;
+};
 
 export default App;

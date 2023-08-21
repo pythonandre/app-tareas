@@ -1,6 +1,6 @@
 {
     "tasks": [
-      { "id": 1, "title": "Hello JSON Server" },
-      { "id": 2, "title": "JSON Server Tutorial" }
+      { "id": 1, "descripcion": "Hello JSON Server", "fecha_creacion": "14/06/1995", "fecha_vencimiento": "14/06/2025" },
+      { "id": 2, "descripcion": "JSON Server Tutorial", "fecha_creacion": "15/06/2001", "fecha_vencimiento": "15/06/2005" }
     ]
   }
