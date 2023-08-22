@@ -41,7 +41,7 @@ const Task = () => {
               <p className="description">{task.descripcion}</p>
               <div className="inputs">
                 <input type="checkbox" className="checkbox" />
-                <input type="date" value={formatDate(new Date(task.fecha_creacion))}/>
+                <input type="date" className="date" value={formatDate(new Date(task.fecha_creacion))}/>
                 <img
                   src={isOverdue ? cross: mark} style={{width: '10%'}}
                 />

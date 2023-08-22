@@ -1,5 +1,5 @@
 .shadowed-task {
-    width: 500px;
+    min-width: 50%;
     height: 130px;
     background-color: #fff;
     border-radius: 10px;
@@ -22,5 +22,5 @@
   }
 
   .date {
-    margin-left: auto;
+    margin-left: 55%;
   }
