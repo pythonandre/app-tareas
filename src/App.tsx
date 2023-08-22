@@ -1,24 +1,9 @@
-import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from './reducers/rootReducer';
-import { fetchData } from './middleware/middleware';
-import { ThunkDispatch } from 'redux-thunk';
-import { DataActionTypes } from './actions/actions';
+import React from 'react';
+import Task from './components/taskComponent';
 
 const App = () => {
-  const data = useSelector((state: RootState) => state.data.data);
-  const dispatch = useDispatch<ThunkDispatch<RootState, null, DataActionTypes>>();
-  let obtainedData: any = [];
 
-  useEffect(() => {
-    if(obtainedData.length === 0){
-    obtainedData = dispatch(fetchData());
-  }
-  }, []);
-
-  console.log('Datos obtenidos:', data);
-
-  return <div>Contenido de la aplicación</div>;
+  return <div style={{display: 'flex', justifyContent:'center', 'alignItems': 'center', marginTop: '5%'}}><Task/></div>;
 };
 
 export default App;
