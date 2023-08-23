@@ -94,6 +94,7 @@ const Task = () => {
           />
           <button onClick={handleAddTask}>Add Task</button>
         </div>
+        <br></br>
       </div>
     </>
   );
