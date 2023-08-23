@@ -16,6 +16,9 @@ const Task = () => {
   const [obtainedData, setObtainedData] = useState<any[]>([]);
   const [newTaskDescription, setNewTaskDescription] = useState<string>('');
   const [newTaskDueDate, setNewTaskDueDate] = useState<string>('');
+  const [selectedTasks, setSelectedTasks] = useState<number[]>([]);
+  const [completedTasks, setCompletedTasks] = useState<number[]>([]);
+
 
   useEffect(() => {
     if (obtainedData?.length === 0) {
@@ -26,13 +29,16 @@ const Task = () => {
   }, [obtainedData, dispatch]);
 
   const formatDate = (date: Date) => {
-    const day = date.getDate();
+    const day = date.getDate() + 1;
     let month = date.getMonth() + 1;
     const year = date.getFullYear();
     return year + '-' + 0 + month.toString() + '-' + day;
   }
 
   const handleAddTask = async () => {
+    const newDueDate = new Date();
+    newDueDate.setMonth(newDueDate.getMonth() + 12);
+
     const response = await fetch('http://localhost:3001/tasks', {
       method: 'POST',
       headers: {
@@ -40,43 +46,100 @@ const Task = () => {
       },
       body: JSON.stringify({
         descripcion: newTaskDescription,
-        fecha_vencimiento: newTaskDueDate,
-        // You might need to adjust other properties as needed
+        fecha_creacion: new Date(newTaskDueDate),
+        fecha_vencimiento: newDueDate,
+        isDone: false,
       }),
     });
     if (response.ok) {
-      // Refetch the data to update the list
       dispatch(fetchData()).then((fetchedData: any) => {
         setObtainedData(fetchedData);
       });
-
-      // Clear the form fields
       setNewTaskDescription('');
       setNewTaskDueDate('');
     }
   };
 
+  const handleCheckboxChange = (taskId: number) => {
+    if (selectedTasks.includes(taskId)) {
+      setSelectedTasks(selectedTasks.filter(id => id !== taskId));
+    } else {
+      setSelectedTasks([...selectedTasks, taskId]);
+    }
+  };
+
+  const handleCleanSelection = async () => {
+    for (const taskId of selectedTasks) {
+      const response = await fetch(`http://localhost:3001/tasks/${taskId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        dispatch(fetchData()).then((fetchedData: any) => {
+          setObtainedData(fetchedData);
+        });
+      }
+    }
+
+    setSelectedTasks([]);
+  };
+
+  const switchStatus = async (taskId: number) => {
+    const fetchResponse = await fetch(`http://localhost:3001/tasks/${taskId}`);
+    const taskData = await fetchResponse.json();
+  
+    const updatedTask = { ...taskData, isDone: !taskData.isDone };
+  
+    const updateResponse = await fetch(`http://localhost:3001/tasks/${taskId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatedTask),
+    });
+  
+    if (updateResponse.ok) {
+      // Si la actualización fue exitosa, obtener los datos actualizados
+      const fetchDataResponse = await fetch(`http://localhost:3001/tasks`);
+      const fetchedData = await fetchDataResponse.json();
+  
+      // Actualizar el estado local con los nuevos datos
+      setObtainedData(fetchedData);
+      dispatch(fetchData()).then((fetchedData: any) => {
+        setObtainedData(fetchedData);
+      });
+    }
+  }
+
   return (
     <>
       <div>
+        <div>
+          <button onClick={handleCleanSelection}>Clean selection</button>
+        </div>
+        <br></br>
         {data?.map(task => {
-          // Parse the task fecha_vencimiento into a Date object
-          const isOverdue = new Date(task.fecha_vencimiento) > new Date();
-          const isWithinSixMonths = new Date(task.fecha_vencimiento).getMonth() <= new Date().getMonth() + 6 && new Date (task.fecha_vencimiento).getFullYear() === new Date(task.fecha_creacion).getFullYear();
-  
+          const taskIsDone = task.isDone;
+          const taskCreationDate = new Date(task.fecha_creacion);
+          const taskDueDate = new Date(task.fecha_vencimiento);
+          const isTheSameYear = (taskCreationDate.getFullYear() >= taskDueDate.getFullYear());
           return (
             <>
-            <div key={task.id} className="shadowed-task">
-              <p className="description">{task.descripcion}</p>
-              <div className="inputs">
-                <input type="checkbox" className="checkbox" />
-                <input type="date" className="date" value={formatDate(new Date(task.fecha_creacion))}/>
-                <img
-                  src={isOverdue ? cross : (isWithinSixMonths ? clock : mark)} style={{width: '10%'}}
-                />
+              <div key={task.id} className="shadowed-task">
+                <p className="description">{task.descripcion}</p>
+                <div className="inputs">
+                  <input
+                    type="checkbox"
+                    className="checkbox"
+                    onChange={() => handleCheckboxChange(task.id)}
+                    checked={selectedTasks.includes(task.id)}
+                  />
+                  <input type="date" className="date" value={formatDate(new Date(task.fecha_creacion))} />
+                  <img src={taskIsDone ? mark : (isTheSameYear ? clock : cross)} style={{ width: '10%' }} />
+                  <button style={{width: "10%"}} onClick={() => switchStatus(task.id)}><span style={{fontSize: "12px"}}>✓</span>/<span style={{fontSize: "14px"}}>🗴</span></button>
+                </div>
               </div>
-            </div>
-            <br/>
+              <br />
             </>
           );
         })}

@@ -11,6 +11,7 @@ export interface Task {
   descripcion: string;
   fecha_creacion: Date;
   fecha_vencimiento: Date;
+  isDone: boolean;
 }
 
 interface FetchDataRequestAction extends Action<ActionTypes.FETCH_DATA_REQUEST> {}
