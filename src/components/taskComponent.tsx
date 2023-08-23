@@ -7,6 +7,7 @@ import { RootState } from '../reducers/rootReducer';
 import { DataActionTypes } from '../actions/actions';
 import cross from '../assets/cross.png'
 import mark from '../assets/mark.png'
+import clock from '../assets/clock.png'
 
 const Task = () => {
   const data = useSelector((state: RootState) => state.data.data);
@@ -35,18 +36,22 @@ const Task = () => {
         {data?.map(task => {
           // Parse the task fecha_vencimiento into a Date object
           const isOverdue = new Date(task.fecha_vencimiento) > new Date();
+          const isWithinSixMonths = new Date(task.fecha_vencimiento).getMonth() <= new Date().getMonth() + 6 && new Date (task.fecha_vencimiento).getFullYear() === new Date(task.fecha_creacion).getFullYear();
   
           return (
+            <>
             <div key={task.id} className="shadowed-task">
               <p className="description">{task.descripcion}</p>
               <div className="inputs">
                 <input type="checkbox" className="checkbox" />
                 <input type="date" className="date" value={formatDate(new Date(task.fecha_creacion))}/>
                 <img
-                  src={isOverdue ? cross: mark} style={{width: '10%'}}
+                  src={isOverdue ? cross : (isWithinSixMonths ? clock : mark)} style={{width: '10%'}}
                 />
               </div>
             </div>
+            <br/>
+            </>
           );
         })}
       </div>
