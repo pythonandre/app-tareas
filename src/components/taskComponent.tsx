@@ -14,6 +14,8 @@ const Task = () => {
   const dispatch = useDispatch<ThunkDispatch<RootState, null, DataActionTypes>>();
 
   const [obtainedData, setObtainedData] = useState<any[]>([]);
+  const [newTaskDescription, setNewTaskDescription] = useState<string>('');
+  const [newTaskDueDate, setNewTaskDueDate] = useState<string>('');
 
   useEffect(() => {
     if (obtainedData?.length === 0) {
@@ -29,6 +31,30 @@ const Task = () => {
     const year = date.getFullYear();
     return year + '-' + 0 + month.toString() + '-' + day;
   }
+
+  const handleAddTask = async () => {
+    const response = await fetch('http://localhost:3001/tasks', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        descripcion: newTaskDescription,
+        fecha_vencimiento: newTaskDueDate,
+        // You might need to adjust other properties as needed
+      }),
+    });
+    if (response.ok) {
+      // Refetch the data to update the list
+      dispatch(fetchData()).then((fetchedData: any) => {
+        setObtainedData(fetchedData);
+      });
+
+      // Clear the form fields
+      setNewTaskDescription('');
+      setNewTaskDueDate('');
+    }
+  };
 
   return (
     <>
@@ -54,6 +80,20 @@ const Task = () => {
             </>
           );
         })}
+        <div className="shadowed-task">
+          <input
+            type="text"
+            placeholder="Task description"
+            value={newTaskDescription}
+            onChange={(e) => setNewTaskDescription(e.target.value)}
+          />
+          <input
+            type="date"
+            value={newTaskDueDate}
+            onChange={(e) => setNewTaskDueDate(e.target.value)}
+          />
+          <button onClick={handleAddTask}>Add Task</button>
+        </div>
       </div>
     </>
   );
