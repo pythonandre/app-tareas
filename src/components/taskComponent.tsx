@@ -18,12 +18,16 @@ const Task = () => {
   const [newTaskDueDate, setNewTaskDueDate] = useState<string>('');
   const [selectedTasks, setSelectedTasks] = useState<number[]>([]);
   const [completedTasks, setCompletedTasks] = useState<number[]>([]);
+  const [filterType, setFilterType] = useState<string>('creation'); // 'creation', 'due', 'status'
+  const [filterOrder, setFilterOrder] = useState<string>('desc'); // 'desc', 'asc'
+  const [originalData, setOriginalData] = useState<any[]>([]);
 
 
   useEffect(() => {
     if (obtainedData?.length === 0) {
       dispatch(fetchData()).then((fetchedData: any) => {
         setObtainedData(fetchedData);
+        setOriginalData(fetchedData); // Guardar una copia de los datos originales
       });
     }
   }, [obtainedData, dispatch]);
@@ -34,6 +38,15 @@ const Task = () => {
     const year = date.getFullYear();
     return year + '-' + 0 + month.toString() + '-' + day;
   }
+
+  const handleFilterChange = (type: string) => {
+    if (type === filterType) {
+      setFilterOrder(filterOrder === 'desc' ? 'asc' : 'desc');
+    } else {
+      setFilterType(type);
+      setFilterOrder('desc'); // Restablecer el orden al cambiar el tipo de filtro
+    }
+  };
 
   const handleAddTask = async () => {
     const newDueDate = new Date();
@@ -87,9 +100,9 @@ const Task = () => {
   const switchStatus = async (taskId: number) => {
     const fetchResponse = await fetch(`http://localhost:3001/tasks/${taskId}`);
     const taskData = await fetchResponse.json();
-  
+
     const updatedTask = { ...taskData, isDone: !taskData.isDone };
-  
+
     const updateResponse = await fetch(`http://localhost:3001/tasks/${taskId}`, {
       method: 'PUT',
       headers: {
@@ -97,12 +110,12 @@ const Task = () => {
       },
       body: JSON.stringify(updatedTask),
     });
-  
+
     if (updateResponse.ok) {
       // Si la actualización fue exitosa, obtener los datos actualizados
       const fetchDataResponse = await fetch(`http://localhost:3001/tasks`);
       const fetchedData = await fetchDataResponse.json();
-  
+
       // Actualizar el estado local con los nuevos datos
       setObtainedData(fetchedData);
       dispatch(fetchData()).then((fetchedData: any) => {
@@ -115,34 +128,70 @@ const Task = () => {
     <>
       <div>
         <div>
+        <div>
+          <br></br>
+            <label htmlFor="sortDropdown" className="dropdown">Sort by:</label>
+            <select
+              id="sortDropdown"
+              value={filterType}
+              onChange={(e) => handleFilterChange(e.target.value)}
+            >
+              <option value="creation">
+                Creation Date {filterType === 'creation' && (filterOrder === 'desc' ? '▼' : '▲')}
+              </option>
+              <option value="due">
+                Due Date {filterType === 'due' && (filterOrder === 'desc' ? '▼' : '▲')}
+              </option>
+              <option value="status">
+                Status {filterType === 'status' && (filterOrder === 'desc' ? '▼' : '▲')}
+              </option>
+            </select>
+          </div>
           <button onClick={handleCleanSelection}>Clean selection</button>
         </div>
         <br></br>
-        {data?.map(task => {
-          const taskIsDone = task.isDone;
-          const taskCreationDate = new Date(task.fecha_creacion);
-          const taskDueDate = new Date(task.fecha_vencimiento);
-          const isTheSameYear = (taskCreationDate.getFullYear() >= taskDueDate.getFullYear());
-          return (
-            <>
-              <div key={task.id} className="shadowed-task">
-                <p className="description">{task.descripcion}</p>
-                <div className="inputs">
-                  <input
-                    type="checkbox"
-                    className="checkbox"
-                    onChange={() => handleCheckboxChange(task.id)}
-                    checked={selectedTasks.includes(task.id)}
-                  />
-                  <input type="date" className="date" value={formatDate(new Date(task.fecha_creacion))} />
-                  <img src={taskIsDone ? mark : (isTheSameYear ? clock : cross)} style={{ width: '10%' }} />
-                  <button style={{width: "10%"}} onClick={() => switchStatus(task.id)}><span style={{fontSize: "12px"}}>✓</span>/<span style={{fontSize: "14px"}}>🗴</span></button>
+        {data
+          .sort((a, b) => {
+            if (filterType === 'creation') {
+              return filterOrder === 'desc'
+                ? new Date(b.fecha_creacion).getTime() - new Date(a.fecha_creacion).getTime()
+                : new Date(a.fecha_creacion).getTime() - new Date(b.fecha_creacion).getTime();
+            } else if (filterType === 'due') {
+              return filterOrder === 'desc'
+                ? new Date(a.fecha_vencimiento).getTime() - new Date(b.fecha_vencimiento).getTime()
+                : new Date(b.fecha_vencimiento).getTime() - new Date(a.fecha_vencimiento).getTime();
+            } else if (filterType === 'status') {
+              return filterOrder === 'asc'
+                ? (b.isDone ? 1 : 0) - (a.isDone ? 1 : 0)
+                : (a.isDone ? 1 : 0) - (b.isDone ? 1 : 0);
+            }
+            return 0;
+          })
+          .map(task => {
+            const taskIsDone = task.isDone;
+            const taskCreationDate = new Date(task.fecha_creacion);
+            const taskDueDate = new Date(task.fecha_vencimiento);
+            const isTheSameYear = (taskCreationDate.getFullYear() >= taskDueDate.getFullYear());
+            return (
+              <>
+                <div key={task.id} className="shadowed-task">
+                  <p className="description">{task.descripcion}</p>
+                  <div className="inputs">
+                    <input
+                      type="checkbox"
+                      className="checkbox"
+                      onChange={() => handleCheckboxChange(task.id)}
+                      checked={selectedTasks.includes(task.id)}
+                    />
+                    <input type="date" className="date" value={formatDate(new Date(task.fecha_creacion))} />
+                    <img src={taskIsDone ? mark : (isTheSameYear ? clock : cross)} style={{ width: '10%' }} />
+                    <button style={{ width: "10%" }} onClick={() => switchStatus(task.id)}><span style={{ fontSize: "12px" }}>✓</span>/<span style={{ fontSize: "14px" }}>🗴</span></button>
+                  </div>
                 </div>
-              </div>
-              <br />
-            </>
-          );
-        })}
+                <br />
+              </>
+            );
+          })}
         <div className="shadowed-task">
           <input
             type="text"
