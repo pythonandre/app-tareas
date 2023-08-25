@@ -151,6 +151,7 @@ const Task = () => {
         <br></br>
         {data
           .sort((a, b) => {
+            const isTheSameYear = (new Date(a.fecha_creacion).getFullYear() >= new Date(b.fecha_vencimiento).getFullYear());
             if (filterType === 'creation') {
               return filterOrder === 'desc'
                 ? new Date(b.fecha_creacion).getTime() - new Date(a.fecha_creacion).getTime()
@@ -161,8 +162,8 @@ const Task = () => {
                 : new Date(b.fecha_vencimiento).getTime() - new Date(a.fecha_vencimiento).getTime();
             } else if (filterType === 'status') {
               return filterOrder === 'asc'
-                ? (b.isDone ? 1 : 0) - (a.isDone ? 1 : 0)
-                : (a.isDone ? 1 : 0) - (b.isDone ? 1 : 0);
+                ? (isTheSameYear ? 1 : 0)
+                : (a.isDone ? 1 : 0) - (b.isDone ? 1 : 9);
             }
             return 0;
           })
