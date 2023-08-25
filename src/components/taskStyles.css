@@ -25,6 +25,11 @@
   margin-left: 55%;
 }
 
+.dropdown-div {
+  display: flex;
+  justify-content: space-between;
+}
+
 .dropdown {
-  margin-left: 60%;
+  align-items: flex-end;
 }

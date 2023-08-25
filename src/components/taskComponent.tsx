@@ -128,9 +128,8 @@ const Task = () => {
     <>
       <div>
         <div>
-        <div>
+        <div className="dropdown-div">
           <br></br>
-            <label htmlFor="sortDropdown" className="dropdown">Sort by:</label>
             <select
               id="sortDropdown"
               value={filterType}
